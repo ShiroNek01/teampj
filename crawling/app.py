@@ -58,7 +58,7 @@ if place_list:
             
         #광고 있으면 패스    
         try:
-            advertisement = place_list[i].find_element(By.CLASS_NAME, ".//*[contains{@'iqAyT'}]")
+            advertisement = place_list[i].find_element(By.XPATH, ".//*[contains{@'iqAyT'}]")
             if advertisement:
                 print("광고 있음. 건너뜀")
                 continue
