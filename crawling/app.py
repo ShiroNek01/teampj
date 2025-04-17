@@ -55,8 +55,18 @@ if place_list:
     for i in range(7):
         place_name = place_list[i].text.strip()
         place_info[place_name] = {"review": []}
+            
+        #광고 있으면 패스    
+        try:
+            advertisement = place_list[i].find_element(By.CLASS_NAME, ".//*[contains{@'iqAyT'}]")
+            if advertisement:
+                print("광고 있음. 건너뜀")
+                continue
+        except:
+            print("광고 없음. 계속 진행")
+            pass
 
-        #부모 요소를 클릭(자식 요소를 클릭할 경우 텍스트에 따라 클릭이 안될 수도 있음)
+        #부모 요소를 클릭(자식 요소를 클릭할 경우 텍스트에 따라 클릭이 안될 수도 있기에)
         try:
             click_target = place_list[i].find_element(By.XPATH, "./ancestor::div[contains(@class, 'place_bluelink')]")
             click_target.click()
@@ -66,9 +76,9 @@ if place_list:
             time.sleep(3)
             driver.quit()
             exit()
-
-        driver.switch_to.default_content()
+            
         #entryIframe으로 이동(리뷰와 장소 상세정보가 있음)
+        driver.switch_to.default_content()
         try:
             WebDriverWait(driver, 10).until(
                 EC.frame_to_be_available_and_switch_to_it((By.ID,"entryIframe"))
@@ -78,6 +88,7 @@ if place_list:
             time.sleep(3)
             driver.quit()
             exit()
+
         #리뷰 버튼 클릭
         try:
             WebDriverWait(driver, 10).until(
@@ -90,18 +101,11 @@ if place_list:
             driver.quit()
             exit()
 
-        try:
-            driver.switch_to.default_content()
-            driver.switch_to.frame("searchIframe")
-        except:
-            print("searchIframe 이동 실패")
-            time.sleep(3)
-            driver.quit()
-            exit()
-
         time.sleep(2)
+        #리뷰 스크롤 내리기
         driver.execute_script("window.scrollBy(0, window.innerHeight);")
 
+        #리뷰 수집
         review_list = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, "//div[@class='pui__vn15t2']/a"))
         )
@@ -110,6 +114,16 @@ if place_list:
             review_text = review.text
             if review_text != '더보기':
                 place_info[place_name]["review"].append(review_text)
+
+        #seacrhIframe으로 이동 (아직 entryIframe에 있기 때문)
+        try:
+            driver.switch_to.default_content()
+            driver.switch_to.frame("searchIframe")
+        except:
+            print("searchIframe 이동 실패")
+            time.sleep(3)
+            driver.quit()
+            exit()
 
 result = json.dumps(place_info, ensure_ascii=False, indent=4)
 print(result)
