@@ -14,6 +14,9 @@ chromedriver_autoinstaller.install()
 
 #네이버는 자동화된 접근을 막기에 브라우저처럼 보이게하는 설정
 options = Options()
+
+#백그라운드 실행
+# options.add_argument("--headless")  
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
 driver = webdriver.Chrome(options=options)
 
@@ -56,9 +59,9 @@ if place_list:
         place_name = place_list[i].text.strip()
         place_info[place_name] = {"review": []}
             
-        #광고 있으면 패스    
+        #광고 있으면 패스   //구현 안됨
         try:
-            advertisement = place_list[i].find_element(By.XPATH, ".//*[contains{@'iqAyT'}]")
+            advertisement = place_list[i].find_element(By.CLASS_NAME, "place_blind")
             if advertisement:
                 print("광고 있음. 건너뜀")
                 continue
