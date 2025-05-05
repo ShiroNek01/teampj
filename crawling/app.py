@@ -24,9 +24,11 @@ driver = webdriver.Chrome(options=options)
 driver.get("https://map.naver.com/v5") #get() 원하는 링크로 이동
 time.sleep(random.uniform(2,5))
 
+search_place = input("\n==========================\n검색어 입력 : \n==========================\n")
+
 #검색창 요소 찾기
 search_input = driver.find_element(By.CLASS_NAME, "input_search")
-search_input.send_keys("괴정동 맛집")
+search_input.send_keys(search_place)
 search_input.send_keys(Keys.ENTER)
 
 time.sleep(2)
@@ -57,17 +59,13 @@ place_info = {}
 if place_list:
     for i in range(7):
         place_name = place_list[i].text.strip()
-        place_info[place_name] = {"review": []}
-            
-        #광고 있으면 패스   //구현 안됨
-        try:
-            advertisement = place_list[i].find_element(By.CLASS_NAME, "place_blind")
-            if advertisement:
-                print("광고 있음. 건너뜀")
-                continue
-        except:
-            print("광고 없음. 계속 진행")
-            pass
+        place_info[place_name] = {
+            "review": [], #리뷰
+            "location":"", #위치
+            "operate":"", #운영시간
+            "contact":"", #연락처
+            "website":"" #홈페이지
+            }
 
         #부모 요소를 클릭(자식 요소를 클릭할 경우 텍스트에 따라 클릭이 안될 수도 있기에)
         try:
@@ -92,6 +90,44 @@ if place_list:
             driver.quit()
             exit()
 
+        #기타 상세 정보 수집
+        #장소 위치
+        try:
+            location = driver.find_element(By.CLASS_NAME, "LDgIH").text
+            place_info[place_name]["location"] = location
+            print('_', end='')
+        except:
+            print('/', end='')
+            place_info[place_name]["location"] = "--"
+
+        #운영 정보
+        try:
+            operate = driver.find_element(By.CLASS_NAME, "A_cdD").text
+            place_info[place_name]["operate"] = operate
+            print('_', end='')
+        except:
+            print('/', end='')
+            place_info[place_name]["operate"] = "--"
+
+        #연락처
+        try:
+            contact = driver.find_element(By.CLASS_NAME, "xlx7Q").text
+            place_info[place_name]["contact"] = contact
+            print('_', end='')
+        except:
+            print('/', end='')
+            place_info[place_name]["contact"] = "--"
+
+        #웹사이트 링크
+        try:
+            website = driver.find_element(By.CLASS_NAME, "CHmqa").text
+            place_info[place_name]["website"] = website
+            print('_', end='')
+        except:
+            print('/\t')
+            place_info[place_name]["website"] = "--"
+
+        time.sleep(2)
         #리뷰 버튼 클릭
         try:
             WebDriverWait(driver, 10).until(
@@ -104,7 +140,6 @@ if place_list:
             driver.quit()
             exit()
 
-        time.sleep(2)
         #리뷰 스크롤 내리기
         driver.execute_script("window.scrollBy(0, window.innerHeight);")
 
@@ -130,3 +165,4 @@ if place_list:
 
 result = json.dumps(place_info, ensure_ascii=False, indent=4)
 print(result)
+
