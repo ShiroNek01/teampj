@@ -75,7 +75,7 @@ while True:
                 "website":"" #홈페이지
                 }
 
-            #부모 요소를 클릭(자식 요소를 클릭할 경우 텍스트에 따라 클릭이 안될 수도 있기에)
+            #클릭
             try:
                 click_target = place_list[i].find_element(By.XPATH, "./ancestor::div[contains(@class, 'place_bluelink')]")
                 click_target.click()
@@ -148,22 +148,45 @@ while True:
                 driver.quit()
                 exit()
 
-            #리뷰 스크롤 내리기
-            driver.execute_script("window.scrollBy(0, window.innerHeight);")
+            max_review = 90
+            collected = 0
+            scroll_count = 0
+            max_scroll = 10
 
-            #리뷰 수집
-            review_list = WebDriverWait(driver, 10).until(
-                EC.presence_of_all_elements_located((By.XPATH, "//div[@class='pui__vn15t2']/a"))
-            )
+            while True:
+                #리뷰 스크롤 내리기
+                driver.execute_script("window.scrollBy(0, window.innerHeight);")
+                time.sleep(1)
 
-            for idx, review in enumerate(review_list):
-                review_text = review.text
-                if review_text != '더보기':
-                    place_info[place_name]["review"].append(review_text)
+                #리뷰 수집
+                review_list = WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located((By.XPATH, "//div[@class='pui__vn15t2']/a"))
+                )
+
+                for review in review_list:
+                    review_text = review.text
+                    if review_text not in ('더보기', '') and review_text not in place_info[place_name]["review"]:
+                        place_info[place_name]["review"].append(review_text)
+                        collected += 1
+                    if collected >= max_review:
+                        break
+                if collected >= max_review:
+                    break
+                
+                #더보기 클릭
+                try:
+                    more_bt = driver.find_element(By.XPATH, "//a[@class='fvwqf']")
+                    more_bt.click()
+                    time.sleep(1)
+                except:
+                    pass
+                if len(review_list) <= collected or scroll_count >= max_scroll:
+                    break
+                scroll_count += 1
 
             img_list = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.XPATH, "//a[@class='place_thumb']/img"))
-                )
+                EC.presence_of_all_elements_located((By.XPATH, "//a[@class='place_thumb']/img"))
+            )
 
             #이미지 수집
             for img in img_list[:5]:
@@ -182,6 +205,8 @@ while True:
             
         result = json.dumps(place_info, ensure_ascii=False, indent=4)
         print(result)
+        with open("result.json", "w", encoding="utf-8") as f:
+            json.dump(place_info, f, ensure_ascii=False, indent=4)
 
         index = end_index
         print('=============================')
