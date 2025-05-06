@@ -49,7 +49,7 @@ while True:
     #검색 결과 요소 가져오기
     try:
         place_list = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, "TYaxT"))
+            EC.presence_of_all_elements_located((By.XPATH, "//*[contains(@class, 'TYaxT') or contains(@class, 'YwYLL')]"))
         )
         print(f"{len(place_list)}")
     except:
@@ -68,6 +68,7 @@ while True:
 
             place_info[place_name] = {
                 "review": [], #리뷰
+                "images": [], #이미지
                 "location":"", #위치
                 "operate":"", #운영시간
                 "contact":"", #연락처
@@ -159,6 +160,15 @@ while True:
                 review_text = review.text
                 if review_text != '더보기':
                     place_info[place_name]["review"].append(review_text)
+
+            img_list = WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located((By.XPATH, "//a[@class='place_thumb']/img"))
+                )
+
+            #이미지 수집
+            for img in img_list[:5]:
+                img_url = img.get_attribute("src")  # 이미지 URL 가져오기
+                place_info[place_name]["images"].append(img_url) 
 
             #seacrhIframe으로 이동 (아직 entryIframe에 있기 때문)
             try:
