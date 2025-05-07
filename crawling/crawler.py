@@ -51,7 +51,7 @@ while True:
     #검색 결과 요소 가져오기
     try:
         place_list = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.XPATH, "//*[contains(@class, 'TYaxT') or contains(@class, 'YwYLL') or contains(@class, 'moQ_p')]"))
+            EC.presence_of_all_elements_located((By.XPATH, "//*[contains(@class, 'TYaxT') or contains(@class, 'YwYLL') or contains(@class, 'moQ_p') or contains(@class, 'CMy2_')]"))
         )
         print(f"{len(place_list)}") #찾은 요소 갯수
     except:
