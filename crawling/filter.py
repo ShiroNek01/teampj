@@ -42,6 +42,9 @@ def extract(reviews):
             if any(kw in token for kw in keywords for token in tokens):
                 theme_count[theme] += 1 #해당 인덱스에 해당하는 태그의 출현수 +1
 
+    with open('tag_analysis.json', 'w', encoding='utf-8') as f:
+        json.dump(theme_count, f, ensure_ascii=False, indent=4)
+
     #출현 빈도 기준으로 내림차순 정렬하여 상위 3개 테마 추출함
     return [theme for theme, _ in theme_count.most_common(3)]
 
